@@ -1,18 +1,15 @@
-// ┌──────────────────────────────────────────────────────────────────────────────┐
-// │  CHART.JS — Inicialização dos gráficos                                      │
-// └──────────────────────────────────────────────────────────────────────────────┘
+// CHART.JS — Inicialização dos gráficos
 
 Chart.defaults.color       = 'rgba(245,230,200,0.4)';
 Chart.defaults.borderColor = 'rgba(245,230,200,0.07)';
 Chart.defaults.font.family = 'Inter';
 
-// ── Contextos ──
+// Contextos
 const contextoTemp    = document.getElementById('chartTemp').getContext('2d');
 const contextoConsumo = document.getElementById('chartConsumo').getContext('2d');
-const contextoRele    = document.getElementById('chartRele').getContext('2d');
 const contextoCusto   = document.getElementById('chartCusto').getContext('2d');
 
-// ── Gradientes ──
+// Gradientes
 const gradienteTemp = contextoTemp.createLinearGradient(0, 0, 0, 260);
 gradienteTemp.addColorStop(0,   'rgba(232,69,26,0.35)');
 gradienteTemp.addColorStop(0.6, 'rgba(232,69,26,0.08)');
@@ -22,7 +19,7 @@ const gradienteConsumo = contextoConsumo.createLinearGradient(0, 0, 0, 200);
 gradienteConsumo.addColorStop(0, 'rgba(0,196,180,0.3)');
 gradienteConsumo.addColorStop(1, 'rgba(0,196,180,0)');
 
-// ── Tooltip padrão ──
+// Tooltip padrão
 const estiloTooltip = {
   backgroundColor: '#111',
   borderColor: 'rgba(245,230,200,0.1)',
@@ -31,7 +28,7 @@ const estiloTooltip = {
   bodyColor: 'rgba(245,230,200,0.55)'
 };
 
-// ── Gráfico: Temperatura ──
+// Gráfico: Temperatura
 const graficoTemp = new Chart(contextoTemp, {
   type: 'line',
   data: { labels: [], datasets: [{
@@ -74,7 +71,7 @@ const graficoTemp = new Chart(contextoTemp, {
   }
 });
 
-// ── Gráfico: Custo de Produção (dados do banco — preenchido via db.js) ──
+// Gráfico: Custo de Produção (dados do banco — preenchido via db.js)
 const graficoCusto = new Chart(contextoCusto, {
   type: 'line',
   data: { labels: [], datasets: [
@@ -116,7 +113,7 @@ const graficoCusto = new Chart(contextoCusto, {
   }
 });
 
-// ── Gráfico: Consumo ──
+// Gráfico: Consumo
 const graficoConsumo = new Chart(contextoConsumo, {
   type: 'line',
   data: { labels: [], datasets: [{
@@ -140,27 +137,3 @@ const graficoConsumo = new Chart(contextoConsumo, {
   }
 });
 
-// ── Gráfico: Relé ──
-const graficoRele = new Chart(contextoRele, {
-  type: 'bar',
-  data: { labels: [], datasets: [{
-    label: 'Relé',
-    data: [],
-    backgroundColor: contexto => contexto.raw === 1 ? 'rgba(232,69,26,0.65)' : 'rgba(245,230,200,0.05)',
-    borderColor: contexto => contexto.raw === 1 ? '#e8451a' : 'rgba(245,230,200,0.08)',
-    borderWidth: 1,
-    borderRadius: 2,
-  }]},
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: contexto => contexto.raw === 1 ? ' LIGADO' : ' DESLIGADO' }, ...estiloTooltip }
-    },
-    scales: {
-      x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 10 } } },
-      y: { display: false, min: 0, max: 1.2 }
-    }
-  }
-});

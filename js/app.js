@@ -1,8 +1,6 @@
-// ┌──────────────────────────────────────────────────────────────────────────────┐
-// │  APP.JS — Lógica do sensor em tempo real (Google Sheets)                    │
-// └──────────────────────────────────────────────────────────────────────────────┘
+// APP.JS — Lógica do sensor em tempo real (Google Sheets)
 
-// ── Utils ──
+// Utils
 function analisarCSV(texto) {
   const linhas = texto.trim().split('\n').filter(linha => linha.trim());
   return linhas.slice(1).map(linha => {
@@ -17,33 +15,43 @@ function analisarCSV(texto) {
   }).filter(registro => !isNaN(registro.temperatura));
 }
 
-// Formata apenas a hora. Aceita duas possibilidades de entrada:
-// - cadeia no formato brasileiro "dd/mm/aaaa hh:mm:ss": retorna a parte da hora
-// - timestamp/ISO: converte para hora no `pt-BR`
-function formatarHora(valor) {
+// Formata apenas a hora. Aceita duas situações:
+// - se já estiver em `dd/mm/aaaa hh:mm:ss`, retorna só a parte da hora
+// - se vier em timestamp/ISO, converte para hora local em `pt-BR`
+function formatarHora(entrada) {
   try {
-    if (typeof valor === 'string' && valor.includes('/')) {
-      const [data, hora] = valor.split(' ');
-      return hora || valor;
+    if (typeof entrada === 'string' && entrada.includes('/')) {
+      const [data, hora] = entrada.split(' ');
+      return hora || entrada;
     }
-    const d = new Date(valor);
-    if (isNaN(d)) return valor;
-    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  } catch (err) {
-    return valor;
+
+    const data = new Date(entrada);
+    if (isNaN(data)) return entrada;
+
+    return data.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch {
+    return entrada;
   }
 }
 
-// Formata data e hora. Se já vier no formato brasileiro (contendo '/'),
-// retornamos a string tal como veio para preservar o formato original.
-function formatarDataHora(valor) {
+// Formata data e hora no padrão brasileiro.
+// Se o valor já estiver em formato brasileiro, preservamos exatamente a string original.
+function formatarDataHora(entrada) {
   try {
-    if (typeof valor === 'string' && valor.includes('/')) return valor;
-    const d = new Date(valor);
-    if (isNaN(d)) return valor;
-    return d.toLocaleString('pt-BR');
-  } catch (err) {
-    return valor;
+    if (typeof entrada === 'string' && entrada.includes('/')) {
+      return entrada;
+    }
+
+    const data = new Date(entrada);
+    if (isNaN(data)) return entrada;
+
+    return data.toLocaleString('pt-BR');
+  } catch {
+    return entrada;
   }
 }
 
@@ -59,7 +67,7 @@ const ROTULO_STATUS = {
   CRITICAL: '✕  Crítico'
 };
 
-// ── Atualização principal ──
+// Atualização principal
 function atualizar(registros) {
   if (!registros.length) return;
 
@@ -110,7 +118,6 @@ function atualizar(registros) {
   const rotulos      = recentes.map(registro => formatarHora(registro.dataHora));
   const temperaturas = recentes.map(registro => registro.temperatura);
   const consumos     = recentes.map(registro => registro.consumoAcumulado);
-  const estadosRele  = recentes.map(registro => registro.rele === 'LIGADO' ? 1 : 0);
 
   graficoTemp.data.labels              = rotulos;
   graficoTemp.data.datasets[0].data    = temperaturas;
@@ -119,10 +126,6 @@ function atualizar(registros) {
   graficoConsumo.data.labels           = rotulos;
   graficoConsumo.data.datasets[0].data = consumos;
   graficoConsumo.update('none');
-
-  graficoRele.data.labels              = rotulos;
-  graficoRele.data.datasets[0].data    = estadosRele;
-  graficoRele.update('none');
 
   // Tabela sensor
   const corpoTabela = document.getElementById('tabela-body');
@@ -140,7 +143,7 @@ function atualizar(registros) {
   }).join('');
 }
 
-// ── Fetch ──
+// Fetch
 async function buscarDados() {
   try {
     const resposta  = await fetch(URL_PLANILHA_SENSOR + '&nocache=' + Date.now());
@@ -154,6 +157,6 @@ async function buscarDados() {
   }
 }
 
-// ── Init ──
+// Init
 buscarDados();
 setInterval(buscarDados, INTERVALO);
