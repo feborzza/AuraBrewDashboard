@@ -17,14 +17,34 @@ function analisarCSV(texto) {
   }).filter(registro => !isNaN(registro.temperatura));
 }
 
+// Formata apenas a hora. Aceita duas possibilidades de entrada:
+// - cadeia no formato brasileiro "dd/mm/aaaa hh:mm:ss": retorna a parte da hora
+// - timestamp/ISO: converte para hora no `pt-BR`
 function formatarHora(valor) {
-  try { return new Date(valor).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
-  catch { return valor; }
+  try {
+    if (typeof valor === 'string' && valor.includes('/')) {
+      const [data, hora] = valor.split(' ');
+      return hora || valor;
+    }
+    const d = new Date(valor);
+    if (isNaN(d)) return valor;
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  } catch (err) {
+    return valor;
+  }
 }
 
+// Formata data e hora. Se já vier no formato brasileiro (contendo '/'),
+// retornamos a string tal como veio para preservar o formato original.
 function formatarDataHora(valor) {
-  try { return new Date(valor).toLocaleString('pt-BR'); }
-  catch { return valor; }
+  try {
+    if (typeof valor === 'string' && valor.includes('/')) return valor;
+    const d = new Date(valor);
+    if (isNaN(d)) return valor;
+    return d.toLocaleString('pt-BR');
+  } catch (err) {
+    return valor;
+  }
 }
 
 function obterStatus(temperatura) {
